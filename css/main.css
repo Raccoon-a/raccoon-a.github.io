@@ -2823,3 +2823,21 @@ mark.search-keyword {
     padding: 10px 12px;
   }
 }
+.redc {
+  color: #b73e3e;
+}
+.post-body .note.success {
+  border-left-color: #3e6b1f;
+  background-color: #ebf2f2;
+}
+.posts-expand .post-title-link {
+  border-bottom: 0;
+  color: #000;
+  display: inline-block;
+  position: relative;
+  font-size: 25px;
+}
+.post-body .note.warning {
+  border-left-color: #fd841f;
+  background-color: #f2f2ed;
+}
