@@ -22,27 +22,24 @@
 
     <meta name="description" content="知识点Cookie, Session, TokenCookie： 小饼干，是保存在客户端的一小份数据(不允许超过4KB)Session： 术语叫会话控制，是一种在客户端与服务端之间保持状态的解决方案，通常会在服务端的一份数据来记录会话状态Token：令牌，是校验的凭证，可以理解为cookie中存的session id亦或是存在localstorage中的jwt字符串  Q：为什么我们登录过一次之后">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Spring Session">
+<meta property="og:title" content="会话管理">
 <meta property="og:url" content="http://example.com/2022/11/25/Session/index.html">
 <meta property="og:site_name" content="Rylan&#39;s Blog">
 <meta property="og:description" content="知识点Cookie, Session, TokenCookie： 小饼干，是保存在客户端的一小份数据(不允许超过4KB)Session： 术语叫会话控制，是一种在客户端与服务端之间保持状态的解决方案，通常会在服务端的一份数据来记录会话状态Token：令牌，是校验的凭证，可以理解为cookie中存的session id亦或是存在localstorage中的jwt字符串  Q：为什么我们登录过一次之后">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="https://blog-rylan.oss-cn-beijing.aliyuncs.com/image/20221125231631.png">
 <meta property="article:published_time" content="2022-11-25T12:59:44.000Z">
-<meta property="article:modified_time" content="2022-12-15T07:19:06.108Z">
+<meta property="article:modified_time" content="2022-12-18T12:21:24.221Z">
 <meta property="article:author" content="Rylan">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://blog-rylan.oss-cn-beijing.aliyuncs.com/image/20221125231631.png">
-
 
 <link rel="canonical" href="http://example.com/2022/11/25/Session/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"http://example.com/2022/11/25/Session/","path":"2022/11/25/Session/","title":"Spring Session"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"http://example.com/2022/11/25/Session/","path":"2022/11/25/Session/","title":"会话管理"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>Spring Session | Rylan's Blog</title>
+<title>会话管理 | Rylan's Blog</title>
   
 
 
@@ -66,6 +63,7 @@
         <span class="toggle-line"></span>
         <span class="toggle-line"></span>
         <span class="toggle-line"></span>
+    
     </div>
   </div>
 
@@ -76,9 +74,11 @@
       <p class="site-title">Rylan's Blog</p>
       <i class="logo-line"></i>
     </a>
+
   </div>
 
   <div class="site-nav-right">
+
     <div class="toggle popup-trigger">
         <i class="fa fa-search fa-fw fa-lg"></i>
     </div>
@@ -145,7 +145,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9F%A5%E8%AF%86%E7%82%B9"><span class="nav-number">1.</span> <span class="nav-text">知识点</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Cookie-Session-Token"><span class="nav-number">1.1.</span> <span class="nav-text">Cookie, Session, Token</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spring-Session"><span class="nav-number">2.</span> <span class="nav-text">Spring Session</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9F%A5%E8%AF%86%E7%82%B9"><span class="nav-number">1.</span> <span class="nav-text">知识点</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Cookie-Session-Token"><span class="nav-number">1.1.</span> <span class="nav-text">Cookie, Session, Token</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BC%9A%E8%AF%9D%E7%AE%A1%E7%90%86"><span class="nav-number">2.</span> <span class="nav-text">会话管理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spring-Session"><span class="nav-number">3.</span> <span class="nav-text">Spring Session</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8"><span class="nav-number">3.1.</span> <span class="nav-text">基本使用</span></a></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -155,6 +155,7 @@
       src="https://blog-rylan.oss-cn-beijing.aliyuncs.com/image/16673690157001a3003447ad8d25eb30662641ceb0364982d.jpg">
   <p class="site-author-name" itemprop="name">Rylan</p>
   <div class="site-description" itemprop="description"></div>
+
 </div>
 <div class="site-state-wrap site-overview-item animated">
   <nav class="site-state">
@@ -186,14 +187,17 @@
   </div>
 
 
-
         </div>
       </div>
+      
     </div>
   </aside>
+
   <div class="sidebar-dimmer"></div>
+  
 
 
+  
     </header>
 
     
@@ -232,12 +236,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="Spring Session | Rylan's Blog">
+      <meta itemprop="name" content="会话管理 | Rylan's Blog">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Spring Session
+          会话管理
         </h1>
 
         <div class="post-meta-container">
@@ -255,7 +259,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">Edited on</span>
-      <time title="Modified: 2022-12-15 15:19:06" itemprop="dateModified" datetime="2022-12-15T15:19:06+08:00">2022-12-15</time>
+      <time title="Modified: 2022-12-18 20:21:24" itemprop="dateModified" datetime="2022-12-18T20:21:24+08:00">2022-12-18</time>
     </span>
 
   
@@ -274,20 +278,16 @@
 <span id="more"></span>
 <p>(1)首次登录：客户端发送请求携带登录信息访问服务端<br>(2)颁发令牌：服务端校验用户账户密码正确后返回客户端一个令牌(Token)<br>(3)再次访问：客户端把Token保存在(Cookie, LoaclStroage)等地方以后的每次请求都携带此令牌</p>
 <p>目前比较常用的方式有Cookie-Session, JWT这两种方式都是满足上述的通用流程但又有莫大的差别概述如下</p>
-<p>Cookie-Session(有状态):<br>(1)客户端发送请求携带登录信息访问服务端。<br>(2)服务端校验用户账户密码正确后，会在服务端新建一份session同时把session的id返回给客户端一般保存在cookie中。<br>(3)以后的每次请求都会携带cookie中的token信息(session Id)和服务端保存的session做校验。</p>
-<p>JSON-Web-Token(去中心化)<br>(1)客户端发送请求携带登录信息访问服务端。<br>(2)服务端校验用户账户密码正确后，会对用户信息，签发时间，过期时间加密生成一段字符串返回给客户端一般保存在LocalStorage中。<br>(3)以后的每次请求都会在headers的Authorization中携带token信息送给服务端解析校验。</p>
+<p>Cookie-Session(特点：有状态):<br>(1)客户端发送请求携带登录信息访问服务端。<br>(2)服务端校验用户账户密码正确后，会在服务端新建一份session同时把session的id返回给客户端一般保存在cookie中。<br>(3)以后的每次请求都会携带cookie中的token信息(session Id)和服务端保存的session做校验。</p>
+<p>JSON-Web-Token(特点：去中心化)<br>(1)客户端发送请求携带登录信息访问服务端。<br>(2)服务端校验用户账户密码正确后，会对用户信息，签发时间，过期时间加密生成一段字符串返回给客户端一般保存在LocalStorage中。<br>(3)以后的每次请求都会在headers的Authorization中携带token信息送给服务端解析校验。</p>
 <div class="note warning"><p>讨论上述两种方案是否有无状态可以用另外一个角度思考，session方案是可以通过服务端删除session来使用户退出登录(结束维持的状态)，而jwt方案的权限有效时间是根据颁发时就决定的，无法在服务端主动使token失效，由此就可以看出这并不是和服务端之间持续的维持状态 </p>
 </div>
 
 <hr>
-<blockquote>
-<p>会话管理</p>
-</blockquote>
-<p>Session是保存在服务端的一份数据通常保存在(Tomcat, Jetty)等Web容器中，如果我们的应用实例复制多份以集群方式部署在不同的服务器上，那么请求经过负载均衡后选择服务端访问就会出现已经登录了但session不在此节点而在其他节点的情况。解决办法有tomcat做session复制，负载均衡使用IP_Hash策略，把session作为外部公共资源来存储等。</p>
-<p>其他的没实践过只说说最后一种，把session作为外部公共资源来存储，那么一定是一块可以被大家都访问到的内存空间，通常选用Redis,MongoDB等数据库来存储session信息，我们可以充分利用Redis的kv存储方式，读取速度，主从数据同步特点来保证方便安全的使用session机制。</p>
-<hr>
-<h2 id="Spring-Session"><a href="#Spring-Session" class="headerlink" title="Spring Session"></a>Spring Session</h2><p>Spring session帮我们做了从web容器中将session剥离存放到自定义的介质中提供了一系列session管理的API</p>
-<p><img src="https://blog-rylan.oss-cn-beijing.aliyuncs.com/image/20221125231631.png"><br>spring-session分为以下核心模块：</p>
+<h2 id="会话管理"><a href="#会话管理" class="headerlink" title="会话管理"></a>会话管理</h2><p>Session是保存在服务端的一份数据通常保存在(Tomcat, Jetty)等Web容器中，如果我们的应用实例复制多份以集群方式部署在不同的服务器上，那么请求经过负载均衡后选择服务端访问就会出现已经登录了但session不在此节点而在其他节点的情况。解决办法有tomcat做session复制，负载均衡使用IP_Hash策略，把session作为外部公共资源来存储等。</p>
+<p>其他的没实践过只说说最后一种，把session作为外部公共资源来存储，那么一定是一块可以被大家都访问到的内存空间，存储方式通常选用Redis,MongoDB等数据库来存储session信息，我们可以充分利用Redis的kv存储方式，读取速度，主从数据同步特点来保证便捷的使用session机制。</p>
+<h2 id="Spring-Session"><a href="#Spring-Session" class="headerlink" title="Spring Session"></a>Spring Session</h2><p>Spring Session是Spring系列提供的会话管理API，它允许以应用外部容器中立的方式替换HttpSession，也就是说它是将tomcat等web容器中的session抽离出来存放进自定义容器中。<br>详细介绍：<a target="_blank" rel="noopener" href="https://docs.spring.io/spring-session/reference/index.html">https://docs.spring.io/spring-session/reference/index.html</a></p>
+<h3 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h3><p>session远优于的</p>
 
     </div>
 

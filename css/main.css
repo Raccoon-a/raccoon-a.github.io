@@ -2841,3 +2841,9 @@ mark.search-keyword {
   border-left-color: #fd841f;
   background-color: #f2f2ed;
 }
+body {
+  font-weight: 550;
+}
+.about_card {
+  background: rgba(0,0,0,0);
+}
