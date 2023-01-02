@@ -3,45 +3,24 @@
   <entry>
     <title>会话管理</title>
     <url>/2022/11/25/Session/</url>
-    <content><![CDATA[<h2 id="知识点"><a href="#知识点" class="headerlink" title="知识点"></a>知识点</h2><h3 id="Cookie-Session-Token"><a href="#Cookie-Session-Token" class="headerlink" title="Cookie, Session, Token"></a>Cookie, Session, Token</h3><p>Cookie： <del>小饼干</del>，是保存在客户端的一小份数据(不允许超过4KB)<br>Session： 术语叫会话控制，是一种在客户端与服务端之间保持状态的解决方案，通常会在服务端的一份数据来记录会话状态<br>Token：令牌，是校验的凭证，可以理解为cookie中存的session id亦或是存在localstorage中的jwt字符串</p>
-<div class="note success"><p> Q：为什么我们登录过一次之后下一次再访问就不需要登录了？<br>A：通常在应用层HTTP都是作为无状态协议，每个请求都是完全独立且每个请求包含了处理这个请求所需的完整的数据，发送请求不涉及到状态变更，那么解决上述问题的通用流程如下：</p>
+    <content><![CDATA[<h2 id="知识点"><a href="#知识点" class="headerlink" title="知识点"></a>知识点</h2><h3 id="Cookie-Session-Token"><a href="#Cookie-Session-Token" class="headerlink" title="Cookie, Session, Token"></a>Cookie, Session, Token</h3><p>Cookie： <del>小饼干</del>(bushi)，是保存在客户端的一小份数据(不允许超过4KB)<br>Session： 术语叫会话控制，是一种在客户端与服务端之间保持状态的解决方案，通常会在服务端的一份数据来记录会话状态<br>Token：令牌，是校验的凭证，可以理解为cookie中存的session id亦或是存在localstorage中的jwt字符串</p>
+<div class="note success"><p> Q：为什么我们登录过一次之后下一次再访问就不需要登录了？<br>A：通常在应用层HTTP都是作为无状态协议，每个请求都是完全独立且每个请求包含了处理这个请求所需的完整的数据，发送请求不涉及到状态变更，即使在 HTTP&#x2F;1.1 上，同一个连接允许传输多个 HTTP 请求的情况下，如果第一个请求出错了，后面的请求一般也能够继续处理（当然，如果导致协议解析失败、消息分片错误之类的自然是要除外的）那么让http请求”带上状态“通用流程如下：</p>
 </div>
 <span id="more"></span>
 <p>(1)首次登录：客户端发送请求携带登录信息访问服务端<br>(2)颁发令牌：服务端校验用户账户密码正确后返回客户端一个令牌(Token)<br>(3)再次访问：客户端把Token保存在(Cookie, LoaclStroage)等地方以后的每次请求都携带此令牌</p>
 <p>目前比较常用的方式有Cookie-Session, JWT这两种方式都是满足上述的通用流程但又有莫大的差别概述如下</p>
 <p>Cookie-Session(特点：有状态):<br>(1)客户端发送请求携带登录信息访问服务端。<br>(2)服务端校验用户账户密码正确后，会在服务端新建一份session同时把session的id返回给客户端一般保存在cookie中。<br>(3)以后的每次请求都会携带cookie中的token信息(session Id)和服务端保存的session做校验。</p>
 <p>JSON-Web-Token(特点：去中心化)<br>(1)客户端发送请求携带登录信息访问服务端。<br>(2)服务端校验用户账户密码正确后，会对用户信息，签发时间，过期时间加密生成一段字符串返回给客户端一般保存在LocalStorage中。<br>(3)以后的每次请求都会在headers的Authorization中携带token信息送给服务端解析校验。</p>
-<div class="note warning"><p>讨论上述两种方案是否有无状态可以用另外一个角度思考，session方案是可以通过服务端删除session来使用户退出登录(结束维持的状态)，而jwt方案的权限有效时间是根据颁发时就决定的，无法在服务端主动使token失效，由此就可以看出这并不是和服务端之间持续的维持状态 </p>
+<h3 id="思考与讨论"><a href="#思考与讨论" class="headerlink" title="思考与讨论"></a>思考与讨论</h3><div class="note warning"><p>讨论上述两种方案是否有无状态可以用另外一个角度思考，session方案是可以通过服务端删除session来使用户退出登录(结束维持的状态)，而jwt方案的权限有效时间是根据颁发时就决定的，无法在服务端主动使token失效，由此就可以看出这并不是和服务端之间维持的状态 </p>
 </div>
 
+<div class="note warning"><p> Q: HTTP 协议是无状态协议，这句话本身到底对不对？<br>A: 实际上，并不全对。HTTP&#x2F;1.1 中有一个 Expect: 100-Continue 的功能，它是这么工作的：<br>在发送大量数据的时候，考虑到服务端有可能直接拒收数据，客户端发出请求头并附带 Expect: 100-Continue 的 HTTP 头，不发送请求体，先等待服务器响应<br>服务器收到 Expect: 100-Continue 的请求，如果允许上传，发送 100 Continue 的 HTTP 响应（同一个请求可以有任意个 1xx 的响应，均不是最后的 Response，只起到提示性作用）；如果不允许，例如不允许上传数据，或者数据大小超出限制，直接返回 4xx&#x2F;5xx 的错误<br>客户端收到 100 Continue 的响应之后，继续上传数据<br>可以看出，这实际上很明显是一个有状态协议的套路，它需要先进行一次握手，然后再真正发送数据。不过，HTTP 协议也规定，如果服务端不进行 100 Continue 的响应，建议客户端在等待较短的时间之后仍然上传数据，以达成与不支持 Expect: 100-Continue 功能的服务器的兼容，这样可以算是“能有状态则有状态，否则回到无状态的路上”，这样说 HTTP 1.x 是无状态的协议也是没错的。<br>例如用netty实现一个http server使用100-continue这一机制<br><img src="https://blog-rylan.oss-cn-beijing.aliyuncs.com/image/20230102173338.png"><br><img src="https://blog-rylan.oss-cn-beijing.aliyuncs.com/image/20230102173530.png"><br><img src="https://blog-rylan.oss-cn-beijing.aliyuncs.com/image/20230102173550.png"></p>
+</div>
 <hr>
 <h2 id="会话管理"><a href="#会话管理" class="headerlink" title="会话管理"></a>会话管理</h2><p>Session是保存在服务端的一份数据通常保存在(Tomcat, Jetty)等Web容器中，如果我们的应用实例复制多份以集群方式部署在不同的服务器上，那么请求经过负载均衡后选择服务端访问就会出现已经登录了但session不在此节点而在其他节点的情况。解决办法有tomcat做session复制，负载均衡使用IP_Hash策略，把session作为外部公共资源来存储等。</p>
-<p>其他的没实践过只说说最后一种，把session作为外部公共资源来存储，那么一定是一块可以被大家都访问到的内存空间，存储方式通常选用Redis,MongoDB等数据库来存储session信息，我们可以充分利用Redis的kv存储方式，读取速度，主从数据同步特点来保证便捷的使用session机制。</p>
+<p>其他的没实践过只说说最后一种，把session作为外部公共资源来存储，那么一定是一块可以被大家都访问到的内存空间，存储方式通常选用Redis,MongoDB等数据库来存储session信息，我们可以充分利用Redis的kv存储方式，读取速度来便捷的使用session机制。</p>
 <h2 id="Spring-Session"><a href="#Spring-Session" class="headerlink" title="Spring Session"></a>Spring Session</h2><p>Spring Session是Spring系列提供的会话管理API，它允许以应用外部容器中立的方式替换HttpSession，也就是说它是将tomcat等web容器中的session抽离出来存放进自定义容器中。<br>详细介绍：<a href="https://docs.spring.io/spring-session/reference/index.html">https://docs.spring.io/spring-session/reference/index.html</a></p>
 <h3 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h3><p>session远优于的</p>
-]]></content>
-  </entry>
-  <entry>
-    <title>Hello World</title>
-    <url>/2022/10/30/hello-world/</url>
-    <content><![CDATA[<h1 id="中文测试"><a href="#中文测试" class="headerlink" title="中文测试"></a>中文测试</h1><h2 id="Linux操作系统中的基础概念"><a href="#Linux操作系统中的基础概念" class="headerlink" title="Linux操作系统中的基础概念"></a>Linux操作系统中的基础概念</h2><p>在介绍select、poll、epoll之前，我们首先了解一下linux的基础概念</p>
-<h3 id="用户空间-x2F-内核空间"><a href="#用户空间-x2F-内核空间" class="headerlink" title="用户空间&#x2F;内核空间"></a>用户空间&#x2F;内核空间</h3><p>现在操作系统都是采用虚拟存储器，那么对32位操作系统而言，它的寻址空间（虚拟存储空间）为4G（2^32）</p>
-<p>而操作系统的核心是内核，独立于普通的应用程序，可以访问受保护的内存空间，也有访问底层硬件设备的所有权限。为了保证用户进程不能直接操作内核（Kernel），保证内核的安全，操作系统将虚拟空间划分为两部分，一部分是内核空间，一部分是用户空间。</p>
-<h3 id="进程切换"><a href="#进程切换" class="headerlink" title="进程切换"></a>进程切换</h3><p>为了控制进程的执行，内核必须有能力挂起正在CPU上运行的进程，并恢复以前挂起的某个进程的执行。这种行为被称为进程切换。因此可以说，任何进程都是在操作系统内核的支持下运行的，是与内核紧密相关的，并且经常切换是非常耗费资源的。</p>
-<h1 id="英文测试"><a href="#英文测试" class="headerlink" title="英文测试"></a>英文测试</h1><p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
-<h1 id="图片测试"><a href="#图片测试" class="headerlink" title="图片测试"></a>图片测试</h1><p><img src="https://blog-rylan.oss-cn-beijing.aliyuncs.com/image/2022-07-29_094240.png"><br><img src="https://blog-rylan.oss-cn-beijing.aliyuncs.com/image/feynman.png"></p>
 ]]></content>
   </entry>
   <entry>
@@ -67,6 +46,29 @@
       <tags>
         <tag>分布式</tag>
       </tags>
+  </entry>
+  <entry>
+    <title>Hello World</title>
+    <url>/2022/10/30/hello-world/</url>
+    <content><![CDATA[<h1 id="中文测试"><a href="#中文测试" class="headerlink" title="中文测试"></a>中文测试</h1><h2 id="Linux操作系统中的基础概念"><a href="#Linux操作系统中的基础概念" class="headerlink" title="Linux操作系统中的基础概念"></a>Linux操作系统中的基础概念</h2><p>在介绍select、poll、epoll之前，我们首先了解一下linux的基础概念</p>
+<h3 id="用户空间-x2F-内核空间"><a href="#用户空间-x2F-内核空间" class="headerlink" title="用户空间&#x2F;内核空间"></a>用户空间&#x2F;内核空间</h3><p>现在操作系统都是采用虚拟存储器，那么对32位操作系统而言，它的寻址空间（虚拟存储空间）为4G（2^32）</p>
+<p>而操作系统的核心是内核，独立于普通的应用程序，可以访问受保护的内存空间，也有访问底层硬件设备的所有权限。为了保证用户进程不能直接操作内核（Kernel），保证内核的安全，操作系统将虚拟空间划分为两部分，一部分是内核空间，一部分是用户空间。</p>
+<h3 id="进程切换"><a href="#进程切换" class="headerlink" title="进程切换"></a>进程切换</h3><p>为了控制进程的执行，内核必须有能力挂起正在CPU上运行的进程，并恢复以前挂起的某个进程的执行。这种行为被称为进程切换。因此可以说，任何进程都是在操作系统内核的支持下运行的，是与内核紧密相关的，并且经常切换是非常耗费资源的。</p>
+<h1 id="英文测试"><a href="#英文测试" class="headerlink" title="英文测试"></a>英文测试</h1><p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
+<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>More info: <a href="https://hexo.io/docs/writing.html">Writing</a></p>
+<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
+
+<p>More info: <a href="https://hexo.io/docs/server.html">Server</a></p>
+<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
+
+<p>More info: <a href="https://hexo.io/docs/generating.html">Generating</a></p>
+<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
+
+<p>More info: <a href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
+<h1 id="图片测试"><a href="#图片测试" class="headerlink" title="图片测试"></a>图片测试</h1><p><img src="https://blog-rylan.oss-cn-beijing.aliyuncs.com/image/2022-07-29_094240.png"><br><img src="https://blog-rylan.oss-cn-beijing.aliyuncs.com/image/feynman.png"></p>
+]]></content>
   </entry>
   <entry>
     <title>使用注解来做鉴权</title>
