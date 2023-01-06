@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Microsoft+yahei:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha256-AbA177XfpSnFEvgpYu1jMygiLabzPCJCRIBtR5jGc0k=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.13.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="[0]前置知识[0] 什么是SocketQ: 首先思考一个问题，在代码层面我们如何让客户端和服务端通信A: 这需要编程语言对操作系统底层接口进行封装供我们使用所以socket并非什么额外的技术，它是对底层网络操作进行抽象封装后的接口，使用抽象出的接口固然爽，但同时也对开发者屏蔽了一些底层细节，例如完成tcp三次握手后，连接会存放进Accept队列等待被上层应用程序取走的连接，调用socket.ac">
+<meta property="og:type" content="article">
+<meta property="og:title" content="网络IO">
+<meta property="og:url" content="http://example.com/2023/01/05/%E7%BD%91%E7%BB%9CIO/index.html">
+<meta property="og:site_name" content="Rylan&#39;s Blog">
+<meta property="og:description" content="[0]前置知识[0] 什么是SocketQ: 首先思考一个问题，在代码层面我们如何让客户端和服务端通信A: 这需要编程语言对操作系统底层接口进行封装供我们使用所以socket并非什么额外的技术，它是对底层网络操作进行抽象封装后的接口，使用抽象出的接口固然爽，但同时也对开发者屏蔽了一些底层细节，例如完成tcp三次握手后，连接会存放进Accept队列等待被上层应用程序取走的连接，调用socket.ac">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://blog-rylan.oss-cn-beijing.aliyuncs.com/image/20230105203147.png">
+<meta property="og:image" content="https://blog-rylan.oss-cn-beijing.aliyuncs.com/image/20230105203212.png">
+<meta property="og:image" content="https://blog-rylan.oss-cn-beijing.aliyuncs.com/image/20230105203900.png">
+<meta property="og:image" content="https://blog-rylan.oss-cn-beijing.aliyuncs.com/image/20230105205323.png">
+<meta property="og:image" content="https://blog-rylan.oss-cn-beijing.aliyuncs.com/image/20230105205349.png">
+<meta property="og:image" content="https://blog-rylan.oss-cn-beijing.aliyuncs.com/image/20230105205408.png">
+<meta property="og:image" content="https://blog-rylan.oss-cn-beijing.aliyuncs.com/image/20230105205427.png">
+<meta property="og:image" content="https://blog-rylan.oss-cn-beijing.aliyuncs.com/image/20230105205447.png">
+<meta property="og:image" content="https://blog-rylan.oss-cn-beijing.aliyuncs.com/image/20230105213321.png">
+<meta property="og:image" content="https://blog-rylan.oss-cn-beijing.aliyuncs.com/image/20230105213505.png">
+<meta property="og:image" content="https://blog-rylan.oss-cn-beijing.aliyuncs.com/image/20230105211708.png">
+<meta property="og:image" content="https://blog-rylan.oss-cn-beijing.aliyuncs.com/image/20230106111800.png">
+<meta property="og:image" content="https://blog-rylan.oss-cn-beijing.aliyuncs.com/image/20230106122156.png">
+<meta property="og:image" content="https://blog-rylan.oss-cn-beijing.aliyuncs.com/image/20230106122852.png">
+<meta property="article:published_time" content="2023-01-05T11:59:45.000Z">
+<meta property="article:modified_time" content="2023-01-06T04:33:15.898Z">
+<meta property="article:author" content="Rylan">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://blog-rylan.oss-cn-beijing.aliyuncs.com/image/20230105203147.png">
+
+<link rel="canonical" href="http://example.com/2023/01/05/%E7%BD%91%E7%BB%9CIO/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"http://example.com/2023/01/05/%E7%BD%91%E7%BB%9CIO/","path":"2023/01/05/网络IO/","title":"网络IO"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>网络IO | Rylan's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    
+    </div>
+  </div>
+
+ 
+
+  <div class="site-nav-right">
+
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#0-%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86"><span class="nav-number">1.</span> <span class="nav-text">[0]前置知识</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#0-%E4%BB%80%E4%B9%88%E6%98%AFSocket"><span class="nav-number">1.1.</span> <span class="nav-text">[0] 什么是Socket</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%B1%82%E9%9D%A2%E7%9A%84%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1%E5%8E%9F%E7%90%86"><span class="nav-number">1.2.</span> <span class="nav-text">[1] 操作系统层面的网络通信原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-IO%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.3.</span> <span class="nav-text">[2] IO模型</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-Socket-BIO"><span class="nav-number">2.</span> <span class="nav-text">[1] Socket BIO</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-Socket-Nio"><span class="nav-number">3.</span> <span class="nav-text">[2] Socket Nio</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Reactor%E6%A8%A1%E5%BC%8F"><span class="nav-number">4.</span> <span class="nav-text">[3] Reactor模式</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+           <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Rylan"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Rylan</p>
+  <div class="site-description" itemprop="description"></div>
+  
+
+
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">6</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yourname" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yourname" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yourname@gmail.com" title="E-Mail → mailto:yourname@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+        </div>
+      </div>
+      
+    </div>
+  </aside>
+
+  <div class="sidebar-dimmer"></div>
+  
+
+
+  
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2023/01/05/%E7%BD%91%E7%BB%9CIO/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Rylan">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Rylan's Blog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="网络IO | Rylan's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          网络IO
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2023-01-05 19:59:45" itemprop="dateCreated datePublished" datetime="2023-01-05T19:59:45+08:00">2023-01-05</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2023-01-06 12:33:15" itemprop="dateModified" datetime="2023-01-06T12:33:15+08:00">2023-01-06</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="0-前置知识"><a href="#0-前置知识" class="headerlink" title="[0]前置知识"></a>[0]前置知识</h2><h3 id="0-什么是Socket"><a href="#0-什么是Socket" class="headerlink" title="[0] 什么是Socket"></a>[0] 什么是Socket</h3><p>Q: 首先思考一个问题，在代码层面我们如何让客户端和服务端通信<br>A: 这需要编程语言对操作系统底层接口进行封装供我们使用<br>所以socket并非什么额外的技术，它是对底层网络操作进行抽象封装后的接口，使用抽象出的接口固然爽，但同时也对开发者屏蔽了一些底层细节，例如完成tcp三次握手后，连接会存放进Accept队列等待被上层应用程序取走的连接，调用<code>socket.accept()</code>就可以获得该连接然后对其进行操作，所以如果能将网络通信流程结合socket接口来学习会轻松一些。</p>
+<div class="note success"><p>[总结]：<br>socket是在应用层和传输层之间的一个抽象层，它把TCP&#x2F;IP层复杂的操作抽象为几个简单的接口供应用层调用，也就是说你不用再管tcp协议细节及send、recv实现细节。简单的说，Socket就是利用服务器和客户端解决进程间通信连接的问题。</p>
+</div>
+
+<span id="more"></span>
+<h3 id="1-操作系统层面的网络通信原理"><a href="#1-操作系统层面的网络通信原理" class="headerlink" title="[1] 操作系统层面的网络通信原理"></a>[1] 操作系统层面的网络通信原理</h3><p><img src="https://blog-rylan.oss-cn-beijing.aliyuncs.com/image/20230105203147.png"><br><img src="https://blog-rylan.oss-cn-beijing.aliyuncs.com/image/20230105203212.png"><br><font class='redc'>简单来说就是网络传输的二进制流数据，第一步到达网卡，然后拷贝到内核空间，再由内核空间拷贝到用户空间，最后我们的应用进程读取到该数据进行操作</font><div class="note warning"><p>为什么要这么麻烦？以下为简述<br>为了防止操作系统受程序影响崩溃，所以划分成出了内核空间和用户空间，我们平时写完代码就是运行在用户空间上的，当用户空间里进程想要进行文件，内存等资源调度时，不可以直接访问而是触发操作系统的函数执行系统调用，此时就由用户态转化为内核态<br>参考笔记：<a target="_blank" rel="noopener" href="https://www.yuque.com/rlyanpro/vfbdm2/byznm23uifzmn2rl#YfDCD">https://www.yuque.com/rlyanpro/vfbdm2/byznm23uifzmn2rl#YfDCD</a></p>
+</div></p>
+<h3 id="2-IO模型"><a href="#2-IO模型" class="headerlink" title="[2] IO模型"></a>[2] IO模型</h3><p>结合上面提到的网络数据传输过程来看，<font class='redc'>以用户线程的视角来看IO操作会分成两个阶段，数据准备(网卡拷贝到内核空间)和数据读取(内核空间拷贝到用户空间)</font><br><img src="https://blog-rylan.oss-cn-beijing.aliyuncs.com/image/20230105203900.png"><br><font class='redc'>第一阶段来判断同步，异步：</font>是否需要主动读写数据,是为同步，否为异步，这一阶段与阻塞非阻塞无关<br><font class='redc'>第二阶段判断阻塞，非阻塞：</font>⽆需主动读写数据，由操作系统内核完成数据的读写, 等待完成通知<br>以下是五种IO模型<br><img src="https://blog-rylan.oss-cn-beijing.aliyuncs.com/image/20230105205323.png"><br><img src="https://blog-rylan.oss-cn-beijing.aliyuncs.com/image/20230105205349.png"><br><img src="https://blog-rylan.oss-cn-beijing.aliyuncs.com/image/20230105205408.png"><br><img src="https://blog-rylan.oss-cn-beijing.aliyuncs.com/image/20230105205427.png"><br><img src="https://blog-rylan.oss-cn-beijing.aliyuncs.com/image/20230105205447.png"></p>
+<h2 id="1-Socket-BIO"><a href="#1-Socket-BIO" class="headerlink" title="[1] Socket BIO"></a>[1] Socket BIO</h2><p>服务端</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="type">ServerSocket</span> <span class="variable">serverSocket</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ServerSocket</span>(<span class="number">8080</span>);</span><br><span class="line">        <span class="keyword">while</span> (<span class="literal">true</span>)&#123;</span><br><span class="line">            <span class="type">Socket</span> <span class="variable">socket</span> <span class="operator">=</span> serverSocket.accept();</span><br><span class="line">            System.out.println(socket.getRemoteSocketAddress());</span><br><span class="line">            <span class="type">BufferedWriter</span> <span class="variable">bw</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BufferedWriter</span>(<span class="keyword">new</span> <span class="title class_">OutputStreamWriter</span>(socket.getOutputStream()));</span><br><span class="line">            <span class="type">BufferedReader</span> <span class="variable">br</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BufferedReader</span>(<span class="keyword">new</span> <span class="title class_">InputStreamReader</span>(socket.getInputStream()));</span><br><span class="line">            <span class="type">Scanner</span> <span class="variable">scanner</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Scanner</span>(System.in);</span><br><span class="line">            <span class="keyword">while</span> (<span class="literal">true</span>)&#123;</span><br><span class="line">                <span class="comment">//输入流</span></span><br><span class="line">                <span class="type">String</span> <span class="variable">str</span> <span class="operator">=</span> br.readLine();</span><br><span class="line">                System.out.println(<span class="string">&quot;客户端跟你说：&quot;</span>+str);</span><br><span class="line"></span><br><span class="line">                <span class="comment">//输出流</span></span><br><span class="line">                bw.write(scanner.next());</span><br><span class="line">                bw.newLine();</span><br><span class="line">                bw.flush();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>客户端</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">BioClientExample</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException, InterruptedException &#123;</span><br><span class="line">        <span class="comment">//创建</span></span><br><span class="line">        <span class="type">Socket</span> <span class="variable">socket</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Socket</span>(<span class="string">&quot;127.0.0.2&quot;</span>,<span class="number">8080</span>);</span><br><span class="line">        <span class="comment">//获取输入流输出流</span></span><br><span class="line">        <span class="type">BufferedWriter</span> <span class="variable">bw</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BufferedWriter</span>(<span class="keyword">new</span> <span class="title class_">OutputStreamWriter</span>(socket.getOutputStream()));</span><br><span class="line">        <span class="type">BufferedReader</span> <span class="variable">br</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BufferedReader</span>(<span class="keyword">new</span> <span class="title class_">InputStreamReader</span>(socket.getInputStream()));</span><br><span class="line">        <span class="type">Scanner</span> <span class="variable">scanner</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Scanner</span>(System.in);</span><br><span class="line">        <span class="keyword">while</span> (<span class="literal">true</span>)&#123;</span><br><span class="line">            <span class="comment">//输出流</span></span><br><span class="line">            bw.write(scanner.next());</span><br><span class="line">            bw.newLine();</span><br><span class="line">            bw.flush();</span><br><span class="line">            <span class="comment">//输入流</span></span><br><span class="line">            <span class="type">String</span> <span class="variable">str</span> <span class="operator">=</span> br.readLine();</span><br><span class="line">            System.out.println(<span class="string">&quot;服务端跟你说：&quot;</span>+str);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>编写完测试会发现，如果有两个客户端那它们没办法同时和服务端通信，也就是说服务端不具备处理多连接的能力<br>那么我们可以accept拿到连接后为每一个连接都分配一个线程工作，这样就有了处理多连接的能力<br><img src="https://blog-rylan.oss-cn-beijing.aliyuncs.com/image/20230105213321.png"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">BioServerExample</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="type">ExecutorService</span> <span class="variable">executor</span> <span class="operator">=</span> Executors.newFixedThreadPool(<span class="number">200</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="type">ServerSocket</span> <span class="variable">serverSocket</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ServerSocket</span>(<span class="number">8080</span>);</span><br><span class="line">        <span class="comment">//循环监听</span></span><br><span class="line">        <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">            <span class="type">Socket</span> <span class="variable">socket</span> <span class="operator">=</span> serverSocket.accept();</span><br><span class="line">            System.out.println(socket.getRemoteSocketAddress());</span><br><span class="line">            executor.submit(<span class="keyword">new</span> <span class="title class_">ServerHandler</span>(socket));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">ServerHandler</span> <span class="keyword">extends</span> <span class="title class_">Thread</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> Socket socket;</span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">ServerHandler</span><span class="params">(Socket socket)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.socket = socket;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">while</span> (!Thread.currentThread().isInterrupted() &amp;&amp; !socket.isClosed()) &#123;</span><br><span class="line">                <span class="type">BufferedReader</span> <span class="variable">br</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BufferedReader</span>(<span class="keyword">new</span> <span class="title class_">InputStreamReader</span>(socket.getInputStream()));</span><br><span class="line">                <span class="type">BufferedWriter</span> <span class="variable">bw</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BufferedWriter</span>(<span class="keyword">new</span> <span class="title class_">OutputStreamWriter</span>(socket.getOutputStream()));</span><br><span class="line">                <span class="type">String</span> <span class="variable">data</span> <span class="operator">=</span> br.readLine();</span><br><span class="line">                System.out.println(<span class="string">&quot;客户端说：&quot;</span> + data);</span><br><span class="line">                bw.write(<span class="string">&quot;fuck  you client&quot;</span>);</span><br><span class="line">                bw.newLine();</span><br><span class="line">                bw.flush();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">RuntimeException</span>(e);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">super</span>.run();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>编写完测试后会发现，虽然服务端有了处理多连接的能力，但处理连接使用的是线程池中的线程，如果客户端通信后不进行断开那么会一直占用该线程，这样就没法还给线程池进行复用了，所以结合资源开销，并发效率来看还是不大行。 （但这不是说bio就一定不行，在处理响应速度比较快的短链接时bio非常合适）</p>
+<h2 id="2-Socket-Nio"><a href="#2-Socket-Nio" class="headerlink" title="[2] Socket Nio"></a>[2] Socket Nio</h2><p>在Java中使用Selector(多路复用选择器)来实现NIO<br><img src="https://blog-rylan.oss-cn-beijing.aliyuncs.com/image/20230105213505.png"><br>服务端</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">NioServerExample</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException, InterruptedException &#123;</span><br><span class="line"></span><br><span class="line">        <span class="type">Selector</span> <span class="variable">selector</span> <span class="operator">=</span> getSelector();</span><br><span class="line">        listen(selector);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Selector <span class="title function_">getSelector</span><span class="params">()</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="type">Selector</span> <span class="variable">selector</span> <span class="operator">=</span> Selector.open();</span><br><span class="line"></span><br><span class="line">        <span class="comment">//创建可选通道，设置非阻塞</span></span><br><span class="line">        <span class="type">ServerSocketChannel</span> <span class="variable">serverSocketChannel</span> <span class="operator">=</span> ServerSocketChannel.open();</span><br><span class="line">        serverSocketChannel.configureBlocking(<span class="literal">false</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//绑定通道到指定端口</span></span><br><span class="line">        <span class="type">ServerSocket</span> <span class="variable">socket</span> <span class="operator">=</span> serverSocketChannel.socket();</span><br><span class="line">        socket.bind(<span class="keyword">new</span> <span class="title class_">InetSocketAddress</span>(<span class="number">8080</span>));</span><br><span class="line"></span><br><span class="line">        <span class="comment">//向selector注册IO事件,首先注册SelectionKey.OP_ACCEPT让server accept监听</span></span><br><span class="line">        serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);</span><br><span class="line">        <span class="keyword">return</span> selector;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">listen</span><span class="params">(Selector selector)</span> <span class="keyword">throws</span> IOException, InterruptedException &#123;</span><br><span class="line">        <span class="keyword">while</span> (!Thread.interrupted()) &#123;</span><br><span class="line">            selector.select();</span><br><span class="line">            Set&lt;SelectionKey&gt; selectionKeys = selector.selectedKeys();</span><br><span class="line">            Iterator&lt;SelectionKey&gt; iterator = selectionKeys.iterator();</span><br><span class="line">            <span class="keyword">if</span> (iterator.hasNext()) &#123;</span><br><span class="line">                <span class="type">SelectionKey</span> <span class="variable">key</span> <span class="operator">=</span> iterator.next();</span><br><span class="line">                <span class="comment">//判断IO事件类型进行处理</span></span><br><span class="line">                process(selector, key);</span><br><span class="line">                iterator.remove();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">process</span><span class="params">(Selector selector, SelectionKey key)</span> <span class="keyword">throws</span> IOException, InterruptedException &#123;</span><br><span class="line">        <span class="keyword">if</span> (key.isAcceptable()) &#123;</span><br><span class="line">            System.out.println(Thread.currentThread().getName() + <span class="string">&quot; =&gt;事件类型 accept&quot;</span>);</span><br><span class="line">            <span class="type">ServerSocketChannel</span> <span class="variable">server</span> <span class="operator">=</span> (ServerSocketChannel) key.channel();</span><br><span class="line">            <span class="type">SocketChannel</span> <span class="variable">channel</span> <span class="operator">=</span> server.accept();</span><br><span class="line">            System.out.println(<span class="string">&quot;远程地址：&quot;</span> + channel.getRemoteAddress());</span><br><span class="line">            channel.configureBlocking(<span class="literal">false</span>);</span><br><span class="line">            channel.register(selector, SelectionKey.OP_READ);</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (key.isReadable()) &#123;</span><br><span class="line">            System.out.println(Thread.currentThread().getName() + <span class="string">&quot; =&gt;事件类型 read&quot;</span>);</span><br><span class="line">            <span class="type">SocketChannel</span> <span class="variable">channel</span> <span class="operator">=</span> (SocketChannel) key.channel();</span><br><span class="line">            <span class="type">ByteBuffer</span> <span class="variable">byteBuffer</span> <span class="operator">=</span> ByteBuffer.allocate(<span class="number">500</span>);</span><br><span class="line">            <span class="type">int</span> <span class="variable">len</span> <span class="operator">=</span> channel.read(byteBuffer);</span><br><span class="line">            <span class="keyword">if</span> (len &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                <span class="type">String</span> <span class="variable">content</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">String</span>(byteBuffer.array(), <span class="number">0</span>, len);</span><br><span class="line">                System.out.println(<span class="string">&quot;收到内容：&quot;</span> + content);</span><br><span class="line">                channel.register(selector, SelectionKey.OP_WRITE);</span><br><span class="line">            &#125;</span><br><span class="line">            byteBuffer.clear();</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (key.isWritable()) &#123;</span><br><span class="line">            System.out.println(Thread.currentThread().getName() + <span class="string">&quot; =&gt;事件类型 write&quot;</span>);</span><br><span class="line">            <span class="type">SocketChannel</span> <span class="variable">channel</span> <span class="operator">=</span> (SocketChannel) key.channel();</span><br><span class="line">            <span class="type">String</span> <span class="variable">str</span> <span class="operator">=</span> <span class="string">&quot;client fuck you I am Nio Server&quot;</span>;</span><br><span class="line">            System.out.println(<span class="string">&quot;发送内容：&quot;</span> + str);</span><br><span class="line">            channel.write(ByteBuffer.wrap(str.getBytes()));</span><br><span class="line">            channel.register(selector, SelectionKey.OP_READ);</span><br><span class="line"><span class="comment">//            channel.close(); //向客户端发送数据后管别此通道连接</span></span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>客户端</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">NioClientExample0</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException, InterruptedException &#123;</span><br><span class="line">        <span class="type">Selector</span> <span class="variable">selector</span> <span class="operator">=</span> Selector.open();</span><br><span class="line">        <span class="type">SocketChannel</span> <span class="variable">socketChannel</span> <span class="operator">=</span> SocketChannel.open();</span><br><span class="line">        socketChannel.setOption(StandardSocketOptions.TCP_NODELAY, <span class="literal">true</span>);</span><br><span class="line">        socketChannel.connect(<span class="keyword">new</span> <span class="title class_">InetSocketAddress</span>(<span class="string">&quot;127.0.0.1&quot;</span>, <span class="number">8080</span>));</span><br><span class="line">        socketChannel.configureBlocking(<span class="literal">false</span>);</span><br><span class="line">        socketChannel.register(selector, SelectionKey.OP_WRITE);</span><br><span class="line"></span><br><span class="line">        <span class="type">String</span> <span class="variable">info</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">        <span class="type">Scanner</span> <span class="variable">scanner</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Scanner</span>(System.in);</span><br><span class="line">        <span class="type">ByteBuffer</span> <span class="variable">byteBuffer0</span> <span class="operator">=</span> ByteBuffer.allocate(<span class="number">100</span>);</span><br><span class="line">        <span class="type">ByteBuffer</span> <span class="variable">byteBuffer1</span> <span class="operator">=</span> ByteBuffer.allocate(<span class="number">100</span>);</span><br><span class="line">        <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">            <span class="type">int</span> <span class="variable">len</span> <span class="operator">=</span> socketChannel.read(byteBuffer1);</span><br><span class="line">            System.out.println(<span class="keyword">new</span> <span class="title class_">String</span>(byteBuffer1.array(), <span class="number">0</span>, len));</span><br><span class="line">            byteBuffer1.clear();</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">            info = scanner.next();</span><br><span class="line">            byteBuffer0.put(info.getBytes());</span><br><span class="line">            byteBuffer0.flip();</span><br><span class="line">            socketChannel.write(byteBuffer0);</span><br><span class="line">            byteBuffer0.clear();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>编写完测试会发现，始终都只有main线程来处理socket的accept，read，write，但依然具备处理多连接的能力，这是因为我们把接受连接和读写的IO操作作为事件注册得到复用器上，然后判断当前复用器可以执行哪些操作<br>例如这里，我们服务端在处理完写事件返回客户端数据后，给复用器注册上读事件<code>channel.register(selector, SelectionKey.OP_READ);</code>让它准备接收新的数据而我客户端还没发送时，此时另一个客户端进行了连接，复用器被注册上accept事件，所以立马就处理了accept接收了连接。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#125; <span class="keyword">else</span> <span class="keyword">if</span> (key.isWritable()) &#123;</span><br><span class="line">            System.out.println(Thread.currentThread().getName()+<span class="string">&quot; =&gt;事件类型 write&quot;</span>);</span><br><span class="line">            <span class="type">SocketChannel</span> <span class="variable">channel</span> <span class="operator">=</span> (SocketChannel) key.channel();</span><br><span class="line">            <span class="type">String</span> <span class="variable">str</span> <span class="operator">=</span> <span class="string">&quot;client fuck you I am Nio Server&quot;</span>;</span><br><span class="line">            System.out.println(<span class="string">&quot;发送内容：&quot;</span>+str);</span><br><span class="line">            channel.write(ByteBuffer.wrap(str.getBytes()));</span><br><span class="line">            channel.register(selector, SelectionKey.OP_READ);</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://blog-rylan.oss-cn-beijing.aliyuncs.com/image/20230105211708.png"></p>
+<h2 id="3-Reactor模式"><a href="#3-Reactor模式" class="headerlink" title="[3] Reactor模式"></a>[3] Reactor模式</h2><p>上面了使用多路复用器selector实现了socket nio，实现的关键是抽象出io的行为作为事件注册进selector，进一步进行抽象会得到更清晰的模型Reactor（以事件为驱动）<img src="https://blog-rylan.oss-cn-beijing.aliyuncs.com/image/20230106111800.png">上面的demo是我在了解整个知识体系并学完后写的，所以能够看见Reactor的影子，例如listen对应的就是acceptor，proces对应dispatch。上面的例子也看到了，无论是accept，read，write操作都是在main线程执行的，那么一旦出现了耗时操作，就会导致所有请求处理全部延时，造成阻塞，影响系统性能。<br><font class='redc'>所以又延伸出了另一个模型：单Reactor多线程模型（main线程主管reactor，而reactor下发的任务是多线处理的）</font><br><img src="https://blog-rylan.oss-cn-beijing.aliyuncs.com/image/20230106122156.png"><br>虽然单Reactor多线程模型已经能够处理大量的连接请求，但是由于单Reactor中所有的连接建立、读取、响应都在Reactor线程中处理，无疑是增大了Reactor的压力，在高并发场景下容易成为性能瓶颈，于是就出现了主从Reactor。在主从Reactor多线程模型中，<font class='redc'>主Reactor仅仅负责处理连接，建立连接后将Channel注册到子Reactor中，进行处理IO读写，然后交给线程池处理业务，netty框架就是基于该模型实现的，其中主Reactor在Netty中对应Boss group 线程组，子Reactor对应Worker Group 线程组。主Reactor仅负责建立连接，工作简单，一般设置1个线程就足够。在主Reactor建立好连接后，将其注册到Worker Group线程组，触发相应的IO事件，最终由Pipeline中的多个Handler进行有序处理</font><br><img src="https://blog-rylan.oss-cn-beijing.aliyuncs.com/image/20230106122852.png"></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/12/15/%E5%88%86%E5%B8%83%E5%BC%8F%E6%8A%80%E6%9C%AF%E4%B8%8E%E5%8E%9F%E7%90%86/" rel="prev" title="0分布式系统原理">
+                  <i class="fa fa-chevron-left"></i> 0分布式系统原理
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Rylan</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+  
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.0/search.js" integrity="sha256-vXZMYLEqsROAXkEw93GGIvaB2ab+QW6w3+1ahD9nXXA=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+  
+
+
+
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/koharu.model.json"},"display":{"position":"left","width":150,"height":300},"log":false});</script></body>
+</html>
