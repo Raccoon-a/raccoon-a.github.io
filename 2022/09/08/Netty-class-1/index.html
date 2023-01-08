@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Microsoft+yahei:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha256-AbA177XfpSnFEvgpYu1jMygiLabzPCJCRIBtR5jGc0k=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.13.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="[0] Netty核心组件及模块介绍参考链接：[1]: Netty 4.x User Guide 中文翻译《Netty 4.x 用户指南》[2]: Netty in Action 翻译与学习">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Netty_class_1">
+<meta property="og:url" content="http://example.com/2022/09/08/Netty-class-1/index.html">
+<meta property="og:site_name" content="Rylan&#39;s Blog">
+<meta property="og:description" content="[0] Netty核心组件及模块介绍参考链接：[1]: Netty 4.x User Guide 中文翻译《Netty 4.x 用户指南》[2]: Netty in Action 翻译与学习">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-09-08T10:27:12.000Z">
+<meta property="article:modified_time" content="2023-01-08T10:57:43.046Z">
+<meta property="article:author" content="Rylan">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2022/09/08/Netty-class-1/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"http://example.com/2022/09/08/Netty-class-1/","path":"2022/09/08/Netty-class-1/","title":"Netty_class_1"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Netty_class_1 | Rylan's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    
+    </div>
+  </div>
+
+ 
+
+  <div class="site-nav-right">
+
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#0-Netty%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6%E5%8F%8A%E6%A8%A1%E5%9D%97%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.</span> <span class="nav-text">[0] Netty核心组件及模块介绍</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-Bootstrap%E3%80%81ServerBootstrap"><span class="nav-number">2.</span> <span class="nav-text">[1] Bootstrap、ServerBootstrap</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-Future%E3%80%81ChannelFuture"><span class="nav-number">3.</span> <span class="nav-text">[2] Future、ChannelFuture</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Channel"><span class="nav-number">4.</span> <span class="nav-text">[3] Channel</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-ChannelHandler"><span class="nav-number">5.</span> <span class="nav-text">[4] ChannelHandler</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-Pipeline%E3%80%81ChannelPipeline"><span class="nav-number">6.</span> <span class="nav-text">[5] Pipeline、ChannelPipeline</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-ChannelHandlerContext"><span class="nav-number">7.</span> <span class="nav-text">[6]  ChannelHandlerContext</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+           <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Rylan"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Rylan</p>
+  <div class="site-description" itemprop="description"></div>
+  
+
+
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yourname" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yourname" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yourname@gmail.com" title="E-Mail → mailto:yourname@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+        </div>
+      </div>
+      
+    </div>
+  </aside>
+
+  <div class="sidebar-dimmer"></div>
+  
+
+
+  
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/09/08/Netty-class-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Rylan">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Rylan's Blog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Netty_class_1 | Rylan's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Netty_class_1
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="0-Netty核心组件及模块介绍"><a href="#0-Netty核心组件及模块介绍" class="headerlink" title="[0] Netty核心组件及模块介绍"></a>[0] Netty核心组件及模块介绍</h2><p>参考链接：<br>[1]: <a target="_blank" rel="noopener" href="https://waylau.gitbooks.io/netty-4-user-guide/content/Architectural-Overview/Rich-Buffer-Data-Structure.html">Netty 4.x User Guide 中文翻译《Netty 4.x 用户指南》</a><br>[2]: <a target="_blank" rel="noopener" href="https://macondo.gitbook.io/macondo/">Netty in Action 翻译与学习</a></p>
+<span id="more"></span>
+
+<h2 id="1-Bootstrap、ServerBootstrap"><a href="#1-Bootstrap、ServerBootstrap" class="headerlink" title="[1] Bootstrap、ServerBootstrap"></a>[1] Bootstrap、ServerBootstrap</h2><p>Bootstrap 意思是引导，一个 Netty 应用通常由一个 Bootstrap 开始，主要作用是配置整个 Netty 程序，串联各个组件，Netty 中 Bootstrap 类是客户端程序的启动引导类，ServerBootstrap 是服务端启动引导类<br>常见的方法有</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> ServerBootstrap <span class="title function_">group</span><span class="params">(EventLoopGroup parentGroup, EventLoopGroup childGroup)</span>，该方法用于服务器端，用来设置两个 EventLoop</span><br><span class="line"><span class="keyword">public</span> B <span class="title function_">group</span><span class="params">(EventLoopGroup group)</span>，该方法用于客户端，用来设置一个 EventLoop</span><br><span class="line"><span class="keyword">public</span> B <span class="title function_">channel</span><span class="params">(Class&lt;? extends C&gt; channelClass)</span>，该方法用来设置一个服务器端的通道实现</span><br><span class="line"><span class="keyword">public</span> &lt;T&gt; B <span class="title function_">option</span><span class="params">(ChannelOption&lt;T&gt; option, T value)</span>，用来给 ServerChannel 添加配置</span><br><span class="line"><span class="keyword">public</span> &lt;T&gt; ServerBootstrap <span class="title function_">childOption</span><span class="params">(ChannelOption&lt;T&gt; childOption, T value)</span>，用来给接收到的通道添加配置</span><br><span class="line"><span class="keyword">public</span> ServerBootstrap <span class="title function_">childHandler</span><span class="params">(ChannelHandler childHandler)</span>，该方法用来设置业务处理类（自定义的handler）</span><br><span class="line"><span class="keyword">public</span> ChannelFuture <span class="title function_">bind</span><span class="params">(<span class="type">int</span> inetPort)</span>，该方法用于服务器端，用来设置占用的端口号</span><br><span class="line"><span class="keyword">public</span> ChannelFuture <span class="title function_">connect</span><span class="params">(String inetHost, <span class="type">int</span> inetPort)</span>，该方法用于客户端，用来连接服务器端</span><br></pre></td></tr></table></figure>
+<h2 id="2-Future、ChannelFuture"><a href="#2-Future、ChannelFuture" class="headerlink" title="[2] Future、ChannelFuture"></a>[2] Future、ChannelFuture</h2><p>Netty 中所有的 IO 操作都是异步的，不能立刻得知消息是否被正确处理。但是可以过一会等它执行完成或者直接注册一个监听，具体的实现就是通过 Future 和 ChannelFutures，他们可以注册一个监听，当操作执行成功或失败时监听会自动触发注册的监听事件<br>常见的方法有</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Channel <span class="title function_">channel</span><span class="params">()</span>，返回当前正在进行 IO 操作的通道</span><br><span class="line">ChannelFuture <span class="title function_">sync</span><span class="params">()</span>，等待异步操作执行完毕</span><br></pre></td></tr></table></figure>
+<h2 id="3-Channel"><a href="#3-Channel" class="headerlink" title="[3] Channel"></a>[3] Channel</h2><p>Netty 网络通信的组件，能够用于执行网络 I&#x2F;O 操作。<br>通过 Channel 可获得当前网络连接的通道的状态<br>通过 Channel 可获得网络连接的配置参数（例如接收缓冲区大小）<br><font class='redc'>Channel 提供异步的网络 I&#x2F;O 操作(如建立连接，读写，绑定端口)，异步调用意味着任何 I&#x2F;O 调用都将立即返回，并且不保证在调用结束时所请求的 I&#x2F;O 操作已完成</font><br>调用立即返回一个 ChannelFuture 实例，通过注册监听器到 ChannelFuture 上，可以 I&#x2F;O 操作成功、失败或取消时回调通知调用方<br>支持关联 I&#x2F;O 操作与对应的处理程序<br>不同协议、不同的阻塞类型的连接都有不同的 Channel 类型与之对应，常用的 Channel 类型：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">NioSocketChannel，异步的客户端 TCP Socket 连接。</span><br><span class="line">NioServerSocketChannel，异步的服务器端 TCP Socket 连接。</span><br><span class="line">NioDatagramChannel，异步的 UDP 连接。</span><br><span class="line">NioSctpChannel，异步的客户端 Sctp 连接。</span><br><span class="line">NioSctpServerChannel，异步的 Sctp 服务器端连接，这些通道涵盖了 UDP 和 TCP 网络 IO 以及文件 IO。</span><br></pre></td></tr></table></figure>
+
+<h2 id="4-ChannelHandler"><a href="#4-ChannelHandler" class="headerlink" title="[4] ChannelHandler"></a>[4] ChannelHandler</h2><p>ChannelHandler 是一个接口，处理 I&#x2F;O 事件或拦截 I&#x2F;O 操作，并将其转发到其 ChannelPipeline（业务处理链）中的下一个处理程序<br>详细API参考：<a target="_blank" rel="noopener" href="https://doc.yonyoucloud.com/doc/essential-netty-in-action/CORE%20FUNCTIONS/The%20ChannelHandler%20Family.html">ChannelHandler 和 ChannelPipeline</a></p>
+<h2 id="5-Pipeline、ChannelPipeline"><a href="#5-Pipeline、ChannelPipeline" class="headerlink" title="[5] Pipeline、ChannelPipeline"></a>[5] Pipeline、ChannelPipeline</h2><p>ChannelPipeline 是一个 Handler 的集合，它负责处理和拦截 inbound 或者 outbound 的事件和操作，相当于一个贯穿 Netty 的链</p>
+<div class="note warning"><p>也可以这样理解：ChannelPipeline 是保存 ChannelHandler 的 List，用于处理或拦截 Channel 的入站事件和出站操作</p>
+</div>
+<p>ChannelPipeline 实现了一种高级形式的拦截过滤器模式，使用户可以完全控制事件的处理方式，以及 Channel 中各个的 ChannelHandler 如何相互交互<br>在 Netty 中每个 Channel 都有且仅有一个 ChannelPipeline 与之对应，它们的组成关系如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ChannelPipeline <span class="title function_">addFirst</span><span class="params">(ChannelHandler... handlers)</span> 把一个业务处理类（handler）添加到链中的第一个位置</span><br><span class="line">ChannelPipeline <span class="title function_">addLast</span><span class="params">(ChannelHandler... handlers)</span> 把一个业务处理类（handler）添加到链中的最后一个位置</span><br></pre></td></tr></table></figure>
+
+<h2 id="6-ChannelHandlerContext"><a href="#6-ChannelHandlerContext" class="headerlink" title="[6]  ChannelHandlerContext"></a>[6]  ChannelHandlerContext</h2><p>保存 Channel 相关的所有上下文信息，同时关联一个 ChannelHandler 对象<br>即 ChannelHandlerContext 中包含一个具体的事件处理器 ChannelHandler，同时 ChannelHandlerContext 中也绑定了对应的 pipeline 和 Channel 的信息，方便对 ChannelHandler 进行调用。<br>常用方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ChannelFuture <span class="title function_">close</span><span class="params">()</span>，关闭通道</span><br><span class="line">ChannelOutboundInvoker <span class="title function_">flush</span><span class="params">()</span>，刷新</span><br><span class="line">ChannelFuture <span class="title function_">writeAndFlush</span><span class="params">(Object msg)</span>，将数据写到ChannelPipeline 中当前 ChannelHandler 的下一个 ChannelHandler 开始处理（出站）</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/09/06/Netty-class-0/" rel="prev" title="Netty_class_0">
+                  <i class="fa fa-chevron-left"></i> Netty_class_0
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/11/01/%E5%B0%81%E8%A3%85%E4%B8%80%E4%B8%AAspringboot-stater/" rel="next" title="封装一个springboot-stater">
+                  封装一个springboot-stater <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Rylan</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+  
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.0/search.js" integrity="sha256-vXZMYLEqsROAXkEw93GGIvaB2ab+QW6w3+1ahD9nXXA=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+  
+
+
+
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/haruto.model.json"},"display":{"position":"left","width":200,"height":300},"log":false});</script></body>
+</html>
